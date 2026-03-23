@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+aiohttp
+feedparser
+beautifulsoup4
+google-genai
+httpx
+python-dotenv
+sqlite3

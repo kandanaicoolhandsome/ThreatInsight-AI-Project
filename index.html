@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Insight Pro | By SUPERCOOLHANDSOMEBOY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a; --card-bg: #1e293b; --primary: #38bdf8;
+            --accent: #818cf8; --text-primary: #f1f5f9; --text-secondary: #94a3b8;
+            --vulnerability: #f43f5e; --malware: #c084fc; --attack: #f59e0b;
+            --info: #10b981; --indicator: #c084fc; --campaign: #22d3ee;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg-dark); color: var(--text-primary); overflow: hidden; height: 100vh; }
+        header { padding: 1.2rem 2.5rem; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; }
+        h1 { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .badge { background: var(--primary); color: #000; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 5px; }
+        .search-container { position: relative; width: 350px; }
+        .search-container input { width: 100%; padding: 0.6rem 1rem 0.6rem 2.5rem; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; outline: none; }
+        .btn-sync { padding: 0.6rem 1.2rem; background: #38bdf8; border: none; border-radius: 8px; color: #000; font-weight: 700; cursor: pointer; }
+        main { display: grid; grid-template-columns: 380px 1fr; gap: 1.5rem; padding: 1.5rem; max-width: 1800px; margin: 0 auto; height: calc(100vh - 75px); }
+        .news-list { overflow-y: auto; padding-right: 0.5rem; }
+        .news-item { background: var(--card-bg); padding: 1.2rem; border-radius: 16px; margin-bottom: 0.8rem; cursor: pointer; border: 1px solid rgba(255,255,255,0.03); transition: 0.2s; border-left: 4px solid transparent; }
+        .news-item:hover { border-color: var(--primary); }
+        .news-item.active { background: rgba(255,255,255,0.05); }
+        
+        /* Dynamic Category Borders */
+        .item-vulnerability { border-left-color: var(--vulnerability); }
+        .item-attack { border-left-color: var(--attack); }
+        .item-malware { border-left-color: var(--malware); }
+        .item-info { border-left-color: var(--info); }
+
+        .tag { font-size: 0.6rem; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; font-weight: 800; margin-bottom: 0.5rem; display: inline-block; }
+        .tag-vulnerability { background: rgba(244, 63, 94, 0.15); color: var(--vulnerability); }
+        .tag-attack { background: rgba(245, 158, 11, 0.15); color: var(--attack); }
+        .tag-malware { background: rgba(192, 132, 252, 0.15); color: var(--malware); }
+        .tag-info { background: rgba(16, 185, 129, 0.15); color: var(--info); }
+
+        .detail-view { background: var(--card-bg); border-radius: 20px; padding: 2.5rem; overflow-y: auto; border: 1px solid rgba(255,255,255,0.03); }
+        .section { margin-bottom: 2rem; }
+        .section-header { font-size: 1.1rem; font-weight: 700; color: var(--primary); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; }
+        .summary-box { background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; border-left: 3px solid var(--accent); white-space: pre-line; line-height: 1.6; }
+        
+        .cve-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        .cve-card { background: rgba(244, 63, 94, 0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(244, 63, 94, 0.2); }
+        .kev-badge { background: #ef4444; color: #fff; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 8px; animation: blink 1.5s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+        
+        .ioc-table { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        .ioc-table th, .ioc-table td { padding: 12px; text-align: left; font-size: 0.85rem; }
+        .ioc-table th { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+        .ioc-value { font-family: monospace; padding: 2px 6px; background: rgba(192, 132, 252, 0.1); color: var(--indicator); border-radius: 4px; }
+
+        .campaign-card { background: rgba(34, 211, 238, 0.05); border: 1px solid rgba(34, 211, 238, 0.3); padding: 1.5rem; border-radius: 15px; margin-bottom: 1.5rem; }
+        .campaign-meta { font-size: 0.8rem; color: var(--campaign); margin-top: 8px; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>THREAT INSIGHT <span class="badge">BY SUPERCOOLHANDSOMEBOY</span></h1>
+        <div class="header-actions" style="display:flex; gap: 1.5rem; align-items: center;">
+            <div class="search-container"><input type="text" id="searchInput" placeholder="Search (CVE, Date, IOC, Sector...)" onkeyup="filterNews()"></div>
+            <div class="sync-status"> <span id="statusText">System Ready</span></div>
+            <button class="btn-sync" onclick="syncFeeds()" id="syncBtn">⚡ INTEL SYNC</button>
+        </div>
+    </header>
+    <main>
+        <div class="news-list" id="newsList"></div>
+        <div class="detail-view" id="detailView">
+            <div style="text-align:center; opacity: 0.5; margin-top:100px;"><h3>Intelligence Terminal</h3><p>Select a report to view full analysis</p></div>
+        </div>
+    </main>
+    <script>
+        let allNews = []; let filteredNews = []; let activeId = null;
+
+        async function fetchNews() {
+            try {
+                const res = await fetch('http://127.0.0.1:8000/news');
+                allNews = await res.json();
+                
+                // --- DEEP DATE & TIME SORTING (NEW TO OLD) ---
+                allNews.sort((a, b) => {
+                    const parseDT = (str) => {
+                        if (!str) return 0;
+                        const [dPart, tPart] = str.split(' ');
+                        const [d, m, y] = dPart.split('/').map(Number);
+                        const [hh, mm] = (tPart || "00:00").split(':').map(Number);
+                        return new Date(y, m - 1, d, hh, mm).getTime();
+                    };
+                    return parseDT(b.published_time) - parseDT(a.published_time);
+                });
+                
+                filteredNews = [...allNews];
+                render();
+            } catch (e) { document.getElementById('statusText').innerText = "⚠️ Offline"; }
+        }
+
+        async function syncFeeds() {
+            const btn = document.getElementById('syncBtn'); btn.innerText = "Processing..."; btn.disabled = true;
+            try {
+                await fetch('http://127.0.0.1:8000/sync', { method: 'POST' });
+                setTimeout(async () => { await fetchNews(); btn.innerText = "⚡ INTEL SYNC"; btn.disabled = false; }, 8000);
+            } catch (e) { btn.disabled = false; btn.innerText = "⚡ INTEL SYNC"; }
+        }
+
+        function filterNews() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            filteredNews = allNews.filter(n => 
+                n.title.toLowerCase().includes(q) || 
+                (n.published_time && n.published_time.includes(q)) ||
+                (n.vulnerabilities && n.vulnerabilities.some(v => v.cve.toLowerCase().includes(q)))
+            );
+            render();
+        }
+
+        function render() {
+            const list = document.getElementById('newsList');
+            list.innerHTML = filteredNews.map(n => {
+                const cat = (n.category || 'info').toLowerCase();
+                const timeStr = n.published_time ? `📅 ${n.published_time.split(' ')[0]} | 🕒 ${n.published_time.split(' ')[1] || ''}` : "N/A";
+                return `
+                <div class="news-item item-${cat} ${activeId === n.id ? 'active' : ''}" onclick="showDetail(${n.id})">
+                    <span class="tag tag-${cat}">${n.category || 'INFO'}</span>
+                    <h3 style="font-size: 0.95rem; line-height: 1.4;">${n.title}</h3>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 10px; display:flex; justify-content:space-between;">
+                        <span>📡 ${n.source}</span><span>${timeStr}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function showDetail(id) {
+            activeId = id; render();
+            const n = allNews.find(x => x.id === id); if (!n) return;
+            const view = document.getElementById('detailView');
+            const timeStr = n.published_time ? `📅 ${n.published_time.split(' ')[0]} | 🕒 ${n.published_time.split(' ')[1] || ''}` : "N/A";
+
+            // Filter valid values to keep UI professional
+            const validVulns = (n.vulnerabilities || []).filter(v => 
+                v.cve && !v.cve.includes('Unknown') && !v.cve.includes('ไม่มี') && !v.cve.includes('ระบุ')
+            );
+            const validCampaigns = (n.campaigns || []).filter(c => c.name && c.name !== '');
+
+            view.innerHTML = `
+                <div class="section" style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <span class="tag tag-${(n.category || 'info').toLowerCase()}">${n.category || 'INFO'}</span>
+                        <h2 style="font-size: 2rem; margin-top: 1rem; line-height: 1.2;">${n.title}</h2>
+                        <p style="color:var(--text-secondary); font-size: 0.9rem; margin-top: 10px;">Source: ${n.source} | ${timeStr}</p>
+                    </div>
+                    ${n.source_url ? `<a href="${n.source_url}" target="_blank" class="btn-sync" style="background:#1e293b; color:var(--primary); border:1px solid var(--primary); font-size: 0.8rem; text-decoration:none;">🌐 VIEW FULL REPORT</a>` : ''}
+                </div>
+
+                ${(validCampaigns.length > 0) ? validCampaigns.map(c => `
+                    <div class="campaign-card">
+                        <div class="tag" style="background:var(--campaign); color:#000;">ACTIVE CAMPAIGN</div>
+                        <h4 style="font-size: 1.3rem; color: var(--primary); margin-top: 10px;">${c.name}</h4>
+                        <div class="campaign-meta">🌍 Target Country: ${c.country} | 🏦 Sector: ${c.sector}</div>
+                        <p style="margin-top: 12px; font-size: 0.95rem; color: var(--text-primary);">${c.summary}</p>
+                    </div>`).join('') : ''}
+
+                <div class="section">
+                    <div class="section-header">🛡️ Executive Intelligence Summary</div>
+                    <div class="summary-box">${n.executive_summary || 'No detailed analysis found.'}</div>
+                </div>
+
+                ${(validVulns.length > 0) ? `
+                <div class="section">
+                    <div class="section-header">⚠️ Vulnerabilities Detected</div>
+                    <div class="cve-grid">
+                        ${validVulns.map(v => `
+                        <div class="cve-card">
+                            <h4 style="color:var(--vulnerability); font-size: 1.2rem;">${v.cve} ${v.kev?'<span class="kev-badge">KEV</span>':''}</h4>
+                            <p style="font-size: 0.85rem; margin-top: 5px;"><b>Product:</b> ${v.product}</p>
+                            <div style="font-size:0.75rem; color: #94a3b8; margin-top: 10px; display:flex; justify-content:space-between;">
+                                <span>Severity: ${v.severity}</span>
+                                <span>EPSS: ${v.epss || '0.1200'}</span>
+                            </div>
+                        </div>`).join('')}
+                    </div>
+                </div>` : ''}
+
+                ${(n.indicators && n.indicators.length > 0) ? `
+                <div class="section">
+                    <div class="section-header">🔍 Tactical Indicators (IOCs)</div>
+                    <table class="ioc-table">
+                        <thead><tr><th>Type</th><th>Value</th><th>Confidence</th></tr></thead>
+                        <tbody>${n.indicators.map(i => `<tr><td>${i.type}</td><td><span class="ioc-value">${i.value}</span></td><td>${i.confidence}</td></tr>`).join('')}</tbody>
+                    </table>
+                </div>` : ''}
+
+                ${n.hunt_pack ? `
+                <div class="section">
+                    <div class="section-header">🎯 Hunting & Defense Guidance</div>
+                    <div class="summary-box" style="border-left-color: var(--primary)">${n.hunt_pack}</div>
+                </div>` : ''}
+            `;
+        }
+        fetchNews();
+    </script>
+</body>
+</html>
