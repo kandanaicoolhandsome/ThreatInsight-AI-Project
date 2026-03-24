@@ -76,7 +76,7 @@ async def get_latest_news(db: Session = Depends(get_db)):
             "executive_summary": r.executive_summary,
             "hunt_pack": r.hunt_pack,
             "vulnerabilities": [{"cve": v.cve, "product": v.product, "severity": v.severity, "kev": v.kev_status, "epss": v.epss_score} for v in r.vulnerabilities] if r.vulnerabilities else [],
-            "indicators": [{"type": i.type, "value": i.value} for i in r.indicators] if r.indicators else [],
+            "indicators": [{"type": i.type, "value": i.value, "confidence": i.confidence} for i in r.indicators] if r.indicators else [],
             "campaigns": [{"name": c.name, "summary": c.summary, "sector": c.target_sector, "country": c.target_country} for c in r.campaigns] if r.campaigns else []
         })
     return result
@@ -113,7 +113,12 @@ async def sync_data_task(db: Session):
                 ))
 
             for i in cti_data.get('indicators', []):
-                db.add(models.Indicator(report_id=report.id, type=i.get('type',''), value=i.get('value',''), confidence='MED'))
+                db.add(models.Indicator(
+                    report_id=report.id, 
+                    type=i.get('type',''), 
+                    value=i.get('value',''), 
+                    confidence=i.get('confidence','MED')
+                ))
 
             db.commit()
             print(f"SUCCESS: {entry_title}")
