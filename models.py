@@ -15,7 +15,7 @@ class NewsReport(Base):
     content_raw = Column(Text)
     category = Column(String)
     executive_summary = Column(Text)
-    hunt_pack = Column(Text)
+    intelligence_context = Column(Text) # เก็บข้อมูลประวัติศาสตร์/การวิเคราะห์เพิ่มเติม
     
     # Relationships
     vulnerabilities = relationship("Vulnerability", back_populates="report")
@@ -42,6 +42,7 @@ class Indicator(Base):
     report_id = Column(Integer, ForeignKey("news_reports.id"))
     type = Column(String) # ip, domain, url, hash, email
     value = Column(String)
+    description = Column(String) # For context like "อีเมลที่ใช้ส่ง Phishing"
     first_seen = Column(DateTime, default=datetime.datetime.utcnow)
     confidence = Column(String) # High, Medium, Low
     

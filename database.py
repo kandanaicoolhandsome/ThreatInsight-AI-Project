@@ -6,7 +6,7 @@ import os
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./threat_insight.db")
 
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
+    DATABASE_URL, connect_args={"check_same_thread": False, "timeout": 60}
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
